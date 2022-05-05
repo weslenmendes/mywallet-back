@@ -1,4 +1,3 @@
-import Joi from "joi";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 
@@ -63,6 +62,21 @@ export async function signUp(req, res) {
       .insertOne({ name, email, password: encryptedPassword });
 
     res.sendStatus(201);
+  } catch (e) {
+    res.sendStatus(500);
+    console.error(e);
+  }
+}
+
+export async function signOut(req, res) {
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer ", "").trim();
+
+  if (!token) return res.status(401).send("Unauthorized");
+
+  try {
+    await db.collection("sessions").deleteOne({ token });
+    res.sendStatus(200);
   } catch (e) {
     res.sendStatus(500);
     console.error(e);
