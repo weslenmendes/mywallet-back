@@ -4,16 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { db } from "../config/db.js";
 
-const signInSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().required(),
-});
-
-const signUpSchema = Joi.object({
-  name: Joi.string().required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().required(),
-});
+import { signInSchema, signUpSchema } from "../models/authSchema.js";
 
 export async function signIn(req, res) {
   const { error } = signInSchema.validate(req.body, { abortEarly: false });
@@ -41,7 +32,7 @@ export async function signIn(req, res) {
 
       res.send(newToken);
     } else {
-      res.status(404).send("User not found!");
+      res.status(401).send("Invalid email or password.");
     }
   } catch (e) {
     res.sendStatus(500);
