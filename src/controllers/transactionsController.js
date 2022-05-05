@@ -99,3 +99,52 @@ export async function addTransaction(req, res) {
     console.error(e);
   }
 }
+
+export async function updateTransaction(req, res) {
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer ", "").trim();
+
+  if (!token) return res.status(401).send("Unauthorized");
+
+  const { error } = transactionSchema.validate(req.body, { abortEarly: false });
+
+  if (error) {
+    const allMessagesOfError = error.details.map(({ message }) => message);
+    return res.status(422).send(allMessagesOfError);
+  }
+
+  try {
+    const session = await isActiveSession(token);
+    if (!session) return res.status(401).send("Unauthorized");
+
+    const { id } = req.params;
+
+    const transaction = await db.collection("transactions").findOne({
+      $and: [
+        { _id: new ObjectId(id) },
+        { userId: new ObjectId(session.userId) },
+      ],
+    });
+
+    if (!transaction) return res.status(404).send("Transaction not found");
+
+    const body = {
+      ...req.body,
+      amount: parseFloat(req.body.amount.toFixed(2)),
+    };
+
+    await db.collection("transactions").updateOne(
+      {
+        $and: [
+          { _id: new ObjectId(id) },
+          { userId: new ObjectId(session.userId) },
+        ],
+      },
+      { $set: { ...body } }
+    );
+    res.send("Transaction updated");
+  } catch (e) {
+    res.sendStatus(500);
+    console.error(e);
+  }
+}
