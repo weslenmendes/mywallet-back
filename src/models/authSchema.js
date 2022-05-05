@@ -1,8 +1,6 @@
 import Joi from "joi";
 
-const regexPassword = new RegExp(
-  "^(?=.*d)(?=.*[a-z])(?=.*[A-Z])(?=.*[$*&@#])[0-9a-zA-Z$*&@#]{8,}$"
-);
+const regexPassword = new RegExp("^[0-9a-zA-Z$*&@#.]{8,30}$");
 
 const signInSchema = Joi.object({
   email: Joi.string().email().required(),
