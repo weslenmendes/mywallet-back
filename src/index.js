@@ -4,6 +4,13 @@ import cors from "cors";
 
 import { connectWithDB } from "./config/db.js";
 import { signIn, signUp, signOut } from "./controllers/authController.js";
+import {
+  getTransaction,
+  getTransactions,
+  addTransaction,
+  updateTransaction,
+  deleteTransaction,
+} from "./controllers/transactionsController.js";
 
 const app = express();
 const port = process.env.PORT || 5000;

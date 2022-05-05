@@ -22,14 +22,14 @@ export async function signIn(req, res) {
         .collection("sessions")
         .findOne({ userId: user._id });
 
-      if (token) return res.send(token);
+      if (token) return res.send({ token, name: user.name });
 
       const newToken = uuidv4();
       await db
         .collection("sessions")
         .insertOne({ token: newToken, userId: user._id });
 
-      res.send(newToken);
+      res.send({ token: newToken, name: user.name });
     } else {
       res.status(401).send("Invalid email or password.");
     }

@@ -6,9 +6,10 @@ const signInSchema = Joi.object({
 });
 
 const signUpSchema = Joi.object({
-  name: Joi.string().required(),
+  name: Joi.string().alphanum().min(3).max(30).required(),
   email: Joi.string().email().required(),
-  password: Joi.string().required(),
+  password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{8,30}$")).required(),
+  confirmPassword: Joi.ref("password"),
 });
 
 export { signInSchema, signUpSchema };
