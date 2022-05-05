@@ -7,6 +7,7 @@ import { signIn, signUp, signOut } from "./controllers/authController.js";
 import {
   getTransaction,
   getTransactions,
+  addTransaction,
 } from "./controllers/transactionsController.js";
 
 const app = express();
@@ -21,6 +22,7 @@ app.post("/signout", signOut);
 
 app.get("/transactions/:id", getTransaction);
 app.get("/transactions", getTransactions);
+app.post("/transactions", addTransaction);
 
 await connectWithDB();
 app.listen(port, () => {
