@@ -9,6 +9,7 @@ import {
   getTransactions,
   addTransaction,
   updateTransaction,
+  deleteTransaction,
 } from "./controllers/transactionsController.js";
 
 const app = express();
@@ -25,6 +26,7 @@ app.get("/transactions/:id", getTransaction);
 app.get("/transactions", getTransactions);
 app.post("/transactions", addTransaction);
 app.put("/transactions/:id", updateTransaction);
+app.delete("/transactions/:id", deleteTransaction);
 
 await connectWithDB();
 app.listen(port, () => {
