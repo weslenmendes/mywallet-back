@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 
-import { db } from "../config/db.js";
+import { db } from "./../config/db.js";
 
-import { signInSchema, signUpSchema } from "../models/authSchema.js";
+import { signInSchema } from "./../schemas/authSchema.js";
 
 export async function signIn(req, res) {
   const { error } = signInSchema.validate(req.body, { abortEarly: false });
@@ -40,13 +40,6 @@ export async function signIn(req, res) {
 }
 
 export async function signUp(req, res) {
-  const { error } = signUpSchema.validate(req.body, { abortEarly: false });
-
-  if (error) {
-    const allMessagesOfError = error.details.map(({ message }) => message);
-    return res.status(422).send(allMessagesOfError);
-  }
-
   try {
     const { name, email, password } = req.body;
     const encryptedPassword = bcrypt.hashSync(password, 10);
@@ -71,8 +64,6 @@ export async function signUp(req, res) {
 export async function signOut(req, res) {
   const { authorization } = req.headers;
   const token = authorization?.replace("Bearer ", "").trim();
-
-  if (!token) return res.status(401).send("Unauthorized");
 
   try {
     await db.collection("sessions").deleteOne({ token });

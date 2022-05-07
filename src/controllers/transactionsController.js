@@ -2,33 +2,14 @@ import dayjs from "dayjs";
 import { ObjectId } from "mongodb";
 
 import { db } from "../config/db.js";
-import { transactionSchema } from "../models/transactionSchema.js";
-
-async function isActiveSession(token) {
-  const session = await db.collection("sessions").findOne({ token });
-
-  if (!session) return false;
-
-  const user = await db.collection("users").findOne({ _id: session.userId });
-
-  if (!user) return false;
-
-  return session;
-}
 
 export async function getTransactions(req, res) {
-  const { authorization } = req.headers;
-  const token = authorization?.replace("Bearer ", "").trim();
-
-  if (!token) return res.status(401).send("Unauthorized");
-
   try {
-    const session = await isActiveSession(token);
-    if (!session) return res.status(401).send("Unauthorized");
+    const { _id } = req.locals.user;
 
     const transactions = await db
       .collection("transactions")
-      .find({ userId: new ObjectId(session.userId) })
+      .find({ userId: new ObjectId(_id) })
       .toArray();
 
     res.send(transactions);
@@ -39,25 +20,18 @@ export async function getTransactions(req, res) {
 }
 
 export async function getTransaction(req, res) {
-  const { authorization } = req.headers;
-  const token = authorization?.replace("Bearer ", "").trim();
+  const { id } = req.params;
 
-  if (!token) return res.status(401).send("Unauthorized");
+  if (!ObjectId.isValid(id)) return res.status(422).send("This id is invalid.");
 
   try {
-    const session = await isActiveSession(token);
-    if (!session) return res.status(401).send("Unauthorized");
-
-    const { id } = req.params;
+    const { _id } = req.locals.user;
 
     const transaction = await db.collection("transactions").findOne({
-      $and: [
-        { _id: new ObjectId(id) },
-        { userId: new ObjectId(session.userId) },
-      ],
+      $and: [{ _id: new ObjectId(id) }, { userId: new ObjectId(_id) }],
     });
 
-    if (!transaction) return res.status(404).send("Transaction not found");
+    if (!transaction) return res.status(404).send("Transaction not found.");
 
     res.send(transaction);
   } catch (e) {
@@ -67,22 +41,8 @@ export async function getTransaction(req, res) {
 }
 
 export async function addTransaction(req, res) {
-  const { authorization } = req.headers;
-  const token = authorization?.replace("Bearer ", "").trim();
-
-  if (!token) return res.status(401).send("Unauthorized");
-
-  const { error } = transactionSchema.validate(req.body, { abortEarly: false });
-
-  if (error) {
-    const allMessagesOfError = error.details.map(({ message }) => message);
-    return res.status(422).send(allMessagesOfError);
-  }
-
   try {
-    const session = await isActiveSession(token);
-    if (!session) return res.status(401).send("Unauthorized");
-
+    const { _id } = req.locals.user;
     const body = {
       ...req.body,
       amount: parseFloat(req.body.amount.toFixed(2)),
@@ -90,10 +50,10 @@ export async function addTransaction(req, res) {
 
     await db.collection("transactions").insertOne({
       ...body,
-      userId: new ObjectId(session.userId),
+      userId: new ObjectId(_id),
       date: dayjs().format("DD/MM"),
     });
-    return res.status(200).send("Transaction created");
+    res.send("Transaction created.");
   } catch (e) {
     res.sendStatus(500);
     console.error(e);
@@ -101,32 +61,18 @@ export async function addTransaction(req, res) {
 }
 
 export async function updateTransaction(req, res) {
-  const { authorization } = req.headers;
-  const token = authorization?.replace("Bearer ", "").trim();
+  const { id } = req.params;
 
-  if (!token) return res.status(401).send("Unauthorized");
-
-  const { error } = transactionSchema.validate(req.body, { abortEarly: false });
-
-  if (error) {
-    const allMessagesOfError = error.details.map(({ message }) => message);
-    return res.status(422).send(allMessagesOfError);
-  }
+  if (!ObjectId.isValid(id)) return res.status(422).send("This id is invalid.");
 
   try {
-    const session = await isActiveSession(token);
-    if (!session) return res.status(401).send("Unauthorized");
-
-    const { id } = req.params;
+    const { _id } = req.locals.user;
 
     const transaction = await db.collection("transactions").findOne({
-      $and: [
-        { _id: new ObjectId(id) },
-        { userId: new ObjectId(session.userId) },
-      ],
+      $and: [{ _id: new ObjectId(id) }, { userId: new ObjectId(_id) }],
     });
 
-    if (!transaction) return res.status(404).send("Transaction not found");
+    if (!transaction) return res.status(404).send("Transaction not found.");
 
     const body = {
       ...req.body,
@@ -135,14 +81,11 @@ export async function updateTransaction(req, res) {
 
     await db.collection("transactions").updateOne(
       {
-        $and: [
-          { _id: new ObjectId(id) },
-          { userId: new ObjectId(session.userId) },
-        ],
+        $and: [{ _id: new ObjectId(id) }, { userId: new ObjectId(_id) }],
       },
       { $set: { ...body } }
     );
-    res.send("Transaction updated");
+    res.send("Transaction updated.");
   } catch (e) {
     res.sendStatus(500);
     console.error(e);
@@ -150,33 +93,23 @@ export async function updateTransaction(req, res) {
 }
 
 export async function deleteTransaction(req, res) {
-  const { authorization } = req.headers;
-  const token = authorization?.replace("Bearer ", "").trim();
+  const { id } = req.params;
 
-  if (!token) return res.status(401).send("Unauthorized");
+  if (!ObjectId.isValid(id)) return res.status(422).send("This id is invalid.");
 
   try {
-    const session = await isActiveSession(token);
-    if (!session) return res.status(401).send("Unauthorized");
-
-    const { id } = req.params;
+    const { _id } = req.locals.user;
 
     const transaction = await db.collection("transactions").findOne({
-      $and: [
-        { _id: new ObjectId(id) },
-        { userId: new ObjectId(session.userId) },
-      ],
+      $and: [{ _id: new ObjectId(id) }, { userId: new ObjectId(_id) }],
     });
 
-    if (!transaction) return res.status(404).send("Transaction not found");
+    if (!transaction) return res.status(404).send("Transaction not found.");
 
     await db.collection("transactions").deleteOne({
-      $and: [
-        { _id: new ObjectId(id) },
-        { userId: new ObjectId(session.userId) },
-      ],
+      $and: [{ _id: new ObjectId(id) }, { userId: new ObjectId(_id) }],
     });
-    res.send("Transaction deleted");
+    res.send("Transaction deleted.");
   } catch (e) {
     res.sendStatus(500);
     console.error(e);
