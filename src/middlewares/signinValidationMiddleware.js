@@ -1,4 +1,4 @@
-import { signInSchema } from "../schemas/authSchema.js";
+import { signInSchema } from "./../schemas/authSchema.js";
 
 export default function signinValidationMiddleware(req, res, next) {
   const { error } = signInSchema.validate(req.body, {

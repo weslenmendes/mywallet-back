@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { ObjectId } from "mongodb";
 
-import { db } from "../config/db.js";
+import { db } from "./../config/db.js";
 
 export async function getTransactions(req, res) {
   try {

@@ -6,10 +6,10 @@ import {
   addTransaction,
   updateTransaction,
   deleteTransaction,
-} from "../controllers/transactionsController.js";
+} from "./../controllers/transactionsController.js";
 
-import { tokenValidationMiddleware } from "../middlewares/authMiddleware.js";
-import { transactionValidationMiddleware } from "../middlewares/transactionMiddleware.js";
+import { tokenValidationMiddleware } from "./../middlewares/authMiddleware.js";
+import { transactionValidationMiddleware } from "./../middlewares/transactionMiddleware.js";
 
 const transactionRouter = Router();
 
