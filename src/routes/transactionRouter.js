@@ -27,10 +27,6 @@ transactionRouter.put(
   transactionValidationMiddleware,
   updateTransaction
 );
-transactionRouter.delete(
-  "/transactions/:id",
-  transactionValidationMiddleware,
-  deleteTransaction
-);
+transactionRouter.delete("/transactions/:id", deleteTransaction);
 
 export default transactionRouter;

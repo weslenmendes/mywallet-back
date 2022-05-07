@@ -1,4 +1,4 @@
-import { transactionSchema } from "../models/transactionSchema.js";
+import { transactionSchema } from "./../schemas/transactionSchema.js";
 
 export function transactionValidationMiddleware(req, res, next) {
   const { error } = transactionSchema.validate(req.body, {

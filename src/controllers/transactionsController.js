@@ -5,7 +5,7 @@ import { db } from "../config/db.js";
 
 export async function getTransactions(req, res) {
   try {
-    const { _id } = req.locals.user;
+    const { _id } = res.locals.user;
 
     const transactions = await db
       .collection("transactions")
@@ -25,7 +25,7 @@ export async function getTransaction(req, res) {
   if (!ObjectId.isValid(id)) return res.status(422).send("This id is invalid.");
 
   try {
-    const { _id } = req.locals.user;
+    const { _id } = res.locals.user;
 
     const transaction = await db.collection("transactions").findOne({
       $and: [{ _id: new ObjectId(id) }, { userId: new ObjectId(_id) }],
@@ -42,7 +42,7 @@ export async function getTransaction(req, res) {
 
 export async function addTransaction(req, res) {
   try {
-    const { _id } = req.locals.user;
+    const { _id } = res.locals.user;
     const body = {
       ...req.body,
       amount: parseFloat(req.body.amount.toFixed(2)),
@@ -66,7 +66,7 @@ export async function updateTransaction(req, res) {
   if (!ObjectId.isValid(id)) return res.status(422).send("This id is invalid.");
 
   try {
-    const { _id } = req.locals.user;
+    const { _id } = res.locals.user;
 
     const transaction = await db.collection("transactions").findOne({
       $and: [{ _id: new ObjectId(id) }, { userId: new ObjectId(_id) }],
@@ -98,7 +98,7 @@ export async function deleteTransaction(req, res) {
   if (!ObjectId.isValid(id)) return res.status(422).send("This id is invalid.");
 
   try {
-    const { _id } = req.locals.user;
+    const { _id } = res.locals.user;
 
     const transaction = await db.collection("transactions").findOne({
       $and: [{ _id: new ObjectId(id) }, { userId: new ObjectId(_id) }],
