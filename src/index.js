@@ -13,7 +13,11 @@ app.use(json());
 
 app.use(routes);
 
-await connectWithDB();
-app.listen(port, () => {
-  console.log(`🚀 Server is running on: http://localhost:${port}/`);
-});
+try {
+  await connectWithDB();
+  app.listen(port, () => {
+    console.log(`🚀 Server is running on: http://localhost:${port}/`);
+  });
+} catch (e) {
+  console.log("There was an error trying to connect to the database.");
+}
